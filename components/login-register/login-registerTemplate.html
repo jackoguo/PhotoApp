@@ -1,0 +1,47 @@
+
+
+<form ng-submit="login()" ng-controller="LoginRegisterController">
+  	To log in, enter your username and password:
+    <div>
+        Username
+    </div>
+  	<div> <input type="text" ng-model="username" /> </div>
+    <div>
+        Password
+    </div>
+  	<div> <input type="password" ng-model="pw" /> </div>
+  	<div> <input type="submit" value="Log In" /> </div>
+</form>
+
+<form ng-submit="register()" ng-controller="LoginRegisterController">
+  	If you don't have an account, register below:
+    <div>
+        Username
+    </div>
+  	<div> <input type="text" ng-model="username_reg"/> </div>
+    <div>
+        Password
+    </div>
+  	<div> <input type="password" ng-model="pw_reg" /> </div>
+    <div>
+        First name
+    </div>
+  	<div> <input type="text" ng-model="first_name" /> </div>
+    <div>
+        Last Name
+    </div>
+  	<div> <input type="text" ng-model="last_name" /> </div>
+    <div>
+        Location
+    </div>
+  	<div> <input type="text" ng-model="location" /> </div>
+    <div>
+        Description
+    </div>
+  	<div> <input type="text" ng-model="description" /> </div>
+    <div>
+        Occupation
+    </div>
+  	<div> <input type="text" ng-model="occupation" /> </div>
+  	<div> <input type="submit" value="Register Me" /> </div>
+</form>

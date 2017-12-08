@@ -1,0 +1,40 @@
+.photos-intro {
+    margin: 20px;
+    font-family: Tahoma;
+    font-size: 24px;
+    border-bottom: 1px solid;
+}
+
+.photos-container {
+    display: flex;
+    flex-direction: column;
+    margin: 20px;
+    padding: 10px;
+    font-family: Tahoma;
+    font-size: 14px;
+}
+
+.photos-item {
+    display: flex;
+    flex-direction: row;
+    margin-bottom: 20px;
+}
+
+.photos-content {
+    width: 60%;
+}
+
+.photos-img {
+    width: 100%;
+}
+
+.photos-comment {
+    width: 40%;
+    align-self: top;
+    font-size: 18px;
+    margin-left: 20px;
+}
+
+.comment-intro {
+    font-weight: bold;
+}

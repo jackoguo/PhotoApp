@@ -1,0 +1,17 @@
+
+<div class="detail">
+
+	<div class="user-intro">
+		Welcome to the page of {{user.first_name}} {{user.last_name}}, who is a {{user.occupation}} from {{user.location}}.
+	</div>
+
+	<div class="description">
+		{{user.first_name}} {{user.last_name}} says: <br />
+		{{user.description}}
+	</div>
+
+	<a class="photos-link" ng-href="#!photos/{{user._id}}">
+        Click here to view this user's photos!
+    </a>
+
+</div>

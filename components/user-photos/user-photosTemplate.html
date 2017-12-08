@@ -1,0 +1,36 @@
+<div>
+	<div>
+		<p class="photos-intro">
+			Photos of {{user.first_name}} {{user.last_name}}
+		</p>
+	</div>
+	<div class="photos-container">
+		<div class="photos-item" ng-repeat="photo in photoList">
+			<div class="photos-content">
+				<img class="photos-img" ng-src="../../images/{{photo.file_name}}" />
+				<p class="photos-time">
+					Time posted: {{photo.date_time}}
+				</p>
+			</div>
+			<div class="photos-comment">
+                <p class="comment-intro">
+                    Comments:
+                </p>
+				<div ng-repeat="userComment in photo.comments">
+                        <a ng-href="#!users/{{userComment.user._id}}">{{userComment.user.first_name}} {{userComment.user.last_name}}</a>:
+                        <p class="comment">
+                            {{userComment.comment}} <br /><br />
+                            {{userComment.date_time}}
+                        </p>
+
+				</div>
+				<form ng-submit="addComment()" ng-controller="UserPhotosController">
+					<div>
+						<input type="text" ng-model="newComment" placeholder="Your comment..."/>
+						<input type="submit" value="Comment!"/>
+					</div>
+				</form>
+			</div>
+		</div>
+	</div>
+</div>

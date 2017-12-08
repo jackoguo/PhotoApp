@@ -1,0 +1,20 @@
+.detail {
+    font-family: Tahoma;
+    margin: 20px;
+}
+
+.user-intro {
+    font-size: 20px;
+    margin: 20px;
+}
+
+.description {
+    font-size: 18px;
+    margin: 20px;
+}
+
+.photos-link {
+    font-size: 20px;
+    font-weight: bold;
+    margin: 20px;
+}
