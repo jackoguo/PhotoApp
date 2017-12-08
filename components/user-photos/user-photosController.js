@@ -7,6 +7,8 @@ cs142App.controller('UserPhotosController', ['$scope', '$resource', '$rootScope'
          * $routeParams  should have the userId property set with the path from the URL.
          */
         var userId = $routeParams.userId;
+        $scope.currUser =  $rootScope.user._id;
+        console.log("currUser: ", $scope.currUser);
 
         console.log("in userphoto controller, userID: ", userId);
 
@@ -14,6 +16,7 @@ cs142App.controller('UserPhotosController', ['$scope', '$resource', '$rootScope'
             $scope.$apply(function() {
                 $scope.user = data1;
                 $scope.userName = data1.first_name + ' ' + data1.last_name;
+                
             });
         });
 
@@ -22,6 +25,13 @@ cs142App.controller('UserPhotosController', ['$scope', '$resource', '$rootScope'
                 $scope.photoList = data2;
             });
         });
+
+        $scope.like = function() {
+            var resource = $resource('/like/' + $scope.photo._id);
+            resource.save({}, function() {
+                $rootScope.$broadcast('renderPhotos');
+            });
+        };
 
         // var User = $resource("/user/:id");
         // User.get({

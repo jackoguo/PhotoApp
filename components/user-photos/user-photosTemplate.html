@@ -5,11 +5,18 @@
 		</p>
 	</div>
 	<div class="photos-container">
-		<div class="photos-item" ng-repeat="photo in photoList">
+		<div class="photos-item" ng-repeat=" photo in photoList | orderBy:'-numLikes' ">
 			<div class="photos-content">
 				<img class="photos-img" ng-src="../../images/{{photo.file_name}}" />
 				<p class="photos-time">
 					Time posted: {{photo.date_time}}
+				</p>
+				<form ng-submit="like()" ng-controller="UserPhotosController">
+					<input ng-if="photo.likes.indexOf(currUser) !== -1" type="submit" value="Unlike" />
+					<input ng-if="photo.likes.indexOf(currUser) === -1" type="submit" value="Like" />
+				</form>
+				<p>
+					Likes: {{photo.likes.length}}
 				</p>
 			</div>
 			<div class="photos-comment">
@@ -22,6 +29,7 @@
                             {{userComment.comment}} <br /><br />
                             {{userComment.date_time}}
                         </p>
+
 
 				</div>
 				<form ng-submit="addComment()" ng-controller="UserPhotosController">

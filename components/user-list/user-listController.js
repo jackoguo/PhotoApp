@@ -2,7 +2,7 @@
 
 cs142App.controller('UserListController', ['$scope', '$resource', '$rootScope', '$routeParams',
     function($scope, $resource, $rootScope, $routeParams) {
-        $scope.main.title = 'Users';
+        
 
 
 

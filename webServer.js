@@ -176,9 +176,7 @@ app.get('/user/list', function(request, response) {
  * XXX change here!
  */
 app.get('/user/:id', function(request, response) {
-    if (request.session === null || request.session == undefined || request.session.user === null || request.session.user === undefined) {
-        response.status(401).send("User is not logged in.");
-    } else {
+
         var id = request.params.id;
         User.findOne({
             _id: id
@@ -202,7 +200,7 @@ app.get('/user/:id', function(request, response) {
             }
             response.status(200).send(userObj);
         });
-    };
+
 });
 
 /*
@@ -394,6 +392,36 @@ app.post('/photos/new', function(request, response) {
     });
 })
 
+app.post('/like/:photo_id', function(request, response) {
+    var photoId = request.params.photo_id;
+    Photo.findOne({
+        _id: photoId
+    }, function(err, photo) {
+        if (err) {
+            console.error("Error liking photo");
+            reponse.status(401).send("error-like");
+            return
+        }
+        else if (photo === null) {
+            console.error("Can't find photo");
+            reponse.status(401).send("error-like-invalid-photo");
+        }
+        else {
+            var userId = request.session.user._id;
+            var userIndex = photo.likes.indexOf(userId);
+            if (userIndex < 0) {
+                photo.likes.push(userId);
+                photo.numLikes = photo.likes.length;
+            }
+            else {
+                photo.likes.splice(userIndex, 1);
+                photo.numLikes = photo.likes.length;
+            }
+            photo.save();
+            response.status(200).send("Like/Unlike succuessful");
+        }
+    });
+});
 
 var server = app.listen(3000, function() {
     var port = server.address().port;
