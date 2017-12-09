@@ -181,7 +181,7 @@ app.get('/user/:id', function(request, response) {
         User.findOne({
             _id: id
         }, function(err, user) {
-            if (err !== null) {
+            if (err) {
                 console.error("User not found.");
                 response.status(400).send("Invalid User ID");
                 return;
@@ -190,7 +190,6 @@ app.get('/user/:id', function(request, response) {
                 response.status(400).send("Invalid User ID")
             }
             var userObj = {
-                /* XXX */
                 _id: user._id,
                 first_name: user.first_name,
                 last_name: user.last_name,
@@ -198,6 +197,7 @@ app.get('/user/:id', function(request, response) {
                 location: user.location,
                 occupation: user.occupation
             }
+            console.log("serverside, userObj: ", userObj);
             response.status(200).send(userObj);
         });
 
@@ -216,6 +216,22 @@ app.get('/user/:id', function(request, response) {
              response.status(400).send(JSON.stringify(err));
              return;
          }
+
+         photos = photos.filter(function(p) {
+             console.log("visibleNames:", p.visibleNames);
+             if (p.isRestricted === false) {
+                 return true;
+             }
+             else if (id === request.session.user._id) {
+                 return true;
+             }
+             else if (p.visibleNames.indexOf(request.session.user.first_name + ' ' + request.session.user.last_name) >= 0) {
+                 return true;
+             }
+             return false;
+         });
+
+
          var photoCopy = JSON.parse(JSON.stringify(photos));
 
 
@@ -325,7 +341,7 @@ app.get('/admin/logout', function(request, response) {
         response.status(200).send();
         return;
     });
-})
+});
 
 app.post('/commentsOfPhoto/:photo_id', function(request, response) {
 
@@ -377,9 +393,13 @@ app.post('/photos/new', function(request, response) {
                 response.status(400).send("file-error");
                 return;
             }
+            var defaultNumLikes = 0;
             Photo.create({
                 file_name: filename,
-                user_id: request.session.user._id
+                user_id: request.session.user._id,
+                visibleNames: request.body.visibleNames.split(","),
+                isRestricted: request.body.isRestricted,
+                numLikes: defaultNumLikes
             }, function(err, photo) {
                 if (err !== null) {
                     response.status(400).send("error-other-photo");

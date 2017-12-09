@@ -26,7 +26,9 @@ var photoSchema = new mongoose.Schema({
     user_id: mongoose.Schema.Types.ObjectId, // The ID of the user who created the photo.
     comments: [commentSchema], // Array of comment objects representing the comments made on this photo.
     likes: [String], // Array of userId's that likes the photo
-    numLikes: Number
+    numLikes: Number,
+    isRestricted: Boolean,
+    visibleNames: [String] // Array of user names that the photo is visible to
 });
 
 // the schema is useless so far

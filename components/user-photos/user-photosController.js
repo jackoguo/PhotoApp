@@ -8,21 +8,24 @@ cs142App.controller('UserPhotosController', ['$scope', '$resource', '$rootScope'
          */
         var userId = $routeParams.userId;
         $scope.currUser =  $rootScope.user._id;
-        console.log("currUser: ", $scope.currUser);
 
-        console.log("in userphoto controller, userID: ", userId);
 
         $scope.FetchModel('/user/' + userId, function(data1) {
             $scope.$apply(function() {
                 $scope.user = data1;
                 $scope.userName = data1.first_name + ' ' + data1.last_name;
-                
+
             });
         });
 
         $scope.FetchModel('/photosOfUser/' + userId, function(data2) {
             $scope.$apply(function () {
                 $scope.photoList = data2;
+                for (var p = 0; p < $scope.photoList.length; p++) {
+                    if (!$scope.photoList[p].numLikes) {
+                        $scope.photoList[p].numLikes = 0;
+                    }
+                }
             });
         });
 
@@ -59,7 +62,7 @@ cs142App.controller('UserPhotosController', ['$scope', '$resource', '$rootScope'
             resource.save({
                 comment: $scope.newComment
             }, function() {
-                console.log("comment saved, broadcasting to render photos again")
+                console.log("comment saved, broadcasting to render photos again");
                 $rootScope.$broadcast('renderPhotos');
             });
         }

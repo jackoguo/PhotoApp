@@ -33,7 +33,6 @@ cs142App.controller('MainController', ['$scope', '$rootScope', '$location','$res
         $scope.logout = function() {
             var resource = $resource('/admin/logout');
             resource.get({}, function() {
-                console.log("at log out function");
                 $rootScope.user = null;
                 $rootScope.isLoggedIn = false;
                 $location.path("/login-register");
@@ -90,7 +89,6 @@ cs142App.controller('MainController', ['$scope', '$rootScope', '$location','$res
 
         // Called on file selection - we simply save a reference to the file in selectedPhotoFile
         $scope.inputFileNameChanged = function(element) {
-
             selectedPhotoFile = element.files[0];
         };
 
@@ -106,10 +104,30 @@ cs142App.controller('MainController', ['$scope', '$rootScope', '$location','$res
                 return;
             }
 
+            var isRestricted = confirm("Do you want to specify a list of accessible users? Ok to specify or Cancel to not specify.");
+            var names = [];
+
+
+            if (isRestricted === true) {
+                console.log("hello!");
+                var visibleName = prompt("Enter a list of names of users that can see this photo, separated by comma (,). If you don't enter a name, only you are accessible. ");
+                if (visibleName) {
+                    var namesRaw = visibleName.split(",");
+                    for (var n = 0; n < namesRaw.length; n++) {
+                        names.push(namesRaw[n].trim());
+                }
+
+            }
+        }
+
+            console.log("names:", names);
+
 
             // Create a DOM form and add the file to it under the name uploadedphoto
             var domForm = new FormData();
             domForm.append('uploadedphoto', selectedPhotoFile);
+            domForm.append('isRestricted', isRestricted);
+            domForm.append('visibleNames', names);
 
             // Using $http to POST the form
             $http.post('/photos/new', domForm, {
@@ -124,13 +142,9 @@ cs142App.controller('MainController', ['$scope', '$rootScope', '$location','$res
                 $rootScope.$broadcast('render');
                 console.log("Photo uploaded successfully!");
             }, function errorCallback(response) {
-                // Couldn't upload the photo.
                 alert("There is an error!");
                 console.error('ERROR uploading photo', response);
             });
         };
-
-
-
     }
 ]);
