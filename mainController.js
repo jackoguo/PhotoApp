@@ -59,12 +59,6 @@ cs142App.controller('MainController', ['$scope', '$rootScope', '$location','$res
             httpRequest.send();
         };
 
-        // get version info
-        var Info = $resource('/test/info');
-        var data = Info.get({}, function() {
-            $scope.version = data.__v;
-        });
-
         // for the first time log in, if no log in info is provided, default to false
         if ($rootScope.isLoggedIn === undefined) {
             $rootScope.isLoggedIn = false;
