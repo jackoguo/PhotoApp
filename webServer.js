@@ -32,6 +32,7 @@
  */
 
 var mongoose = require('mongoose');
+var mongodb = require('mongodb');
 var async = require('async');
 var session = require('express-session');
 var bodyParser = require('body-parser');
@@ -49,8 +50,10 @@ var SchemaInfo = require('./schema/schemaInfo.js');
 var express = require('express');
 var app = express();
 
+// database connection
+var db_url = process.env.DATABASE_URL ? process.env.DATABASE_URL : 'mongodb://localhost/cs142project6';
+mongoose.connect(db_url);
 
-mongoose.connect('mongodb://localhost/cs142project6');
 
 // We have the express static module (http://expressjs.com/en/starter/static-files.html) do all
 // the work for us.
@@ -136,7 +139,6 @@ app.get('/test/:p1', function(request, response) {
                     obj[collections[i].name] = collections[i].count;
                 }
                 response.end(JSON.stringify(obj));
-
             }
         });
     } else {
