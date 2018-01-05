@@ -52,7 +52,6 @@ var app = express();
 
 // database connection
 var db_url = process.env.DATABASE_URL ? process.env.DATABASE_URL : 'mongodb://localhost/cs142project6';
-console.log(db_url);
 mongoose.connect(db_url, {useMongoClient: true});
 var db = mongoose.connection;
 db.on('error', console.error.bind(console, 'MongoDB connection error:'));
