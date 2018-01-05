@@ -14,4 +14,8 @@
         Click here to view this user's photos!
     </a>
 
+	<form ng-if="userMatches" ng-submit="deleteAccount()" ng-controller="UserDetailController">
+		<input type="submit" value="Delete Account" />
+	</form>
+
 </div>

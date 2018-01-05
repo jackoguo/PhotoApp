@@ -49,8 +49,6 @@ var SchemaInfo = require('./schema/schemaInfo.js');
 var express = require('express');
 var app = express();
 
-// XXX - Your submission should work without this line
-var cs142models = require('./modelData/photoApp.js').cs142models;
 
 mongoose.connect('mongodb://localhost/cs142project6');
 
@@ -78,7 +76,9 @@ app.get('/', function(request, response) {
  */
 app.get('/test/:p1', function(request, response) {
     // Express parses the ":p1" from the URL and returns it in the request.params objects.
-    console.log('/test called with param1 = ', request.params.p1);
+
+
+
 
     var param = request.params.p1 || 'info';
 
@@ -100,7 +100,8 @@ app.get('/test/:p1', function(request, response) {
             }
 
             // We got the object - return it in JSON format.
-            console.log('SchemaInfo', info[0]);
+
+
             response.end(JSON.stringify(info[0]));
         });
     } else if (param === 'counts') {
@@ -149,132 +150,127 @@ app.get('/test/:p1', function(request, response) {
  */
 app.get('/user/list', function(request, response) {
 
-        var result = [];
-        User.find(function(err, users) {
-            if (err !== null) {
-                console.error("Error.");
-                response.status(500).send(JSON.stringify(err));
-                return;
-            }
+    var result = [];
+    User.find(function(err, users) {
+        if (err !== null) {
+            console.error("Error.");
+            response.status(500).send(JSON.stringify(err));
+            return;
+        }
 
-            for (var u = 0; u < users.length; u++) {
-                var user = users[u];
-                var userObj = {
-                    _id: user._id,
-                    first_name: user.first_name,
-                    last_name: user.last_name
-                };
-                result.push(userObj);
-
-            }
-            response.status(200).send(result);
-        });
+        for (var u = 0; u < users.length; u++) {
+            var user = users[u];
+            var userObj = {
+                _id: user._id,
+                first_name: user.first_name,
+                last_name: user.last_name
+            };
+            result.push(userObj);
+        }
+        response.status(200).send(result);
+    });
 
 });
 /*
  * URL /user/:id - Return the information for User (id)
- * XXX change here!
  */
 app.get('/user/:id', function(request, response) {
 
-        var id = request.params.id;
-        User.findOne({
-            _id: id
-        }, function(err, user) {
-            if (err) {
-                console.error("User not found.");
-                response.status(400).send("Invalid User ID");
-                return;
-            }
-            if (user === undefined) {
-                response.status(400).send("Invalid User ID")
-            }
-            var userObj = {
-                _id: user._id,
-                first_name: user.first_name,
-                last_name: user.last_name,
-                description: user.description,
-                location: user.location,
-                occupation: user.occupation
-            }
-            console.log("serverside, userObj: ", userObj);
-            response.status(200).send(userObj);
-        });
+    var id = request.params.id;
+    User.findOne({
+        _id: id
+    }, function(err, user) {
+        if (err) {
+            console.error("in User info page - User not found.");
+            response.status(400).send("Invalid User ID");
+            return;
+        }
+        if (user === undefined) {
+            response.status(400).send("Invalid User ID")
+        }
+        var userObj = {
+            _id: user._id,
+            first_name: user.first_name,
+            last_name: user.last_name,
+            description: user.description,
+            location: user.location,
+            occupation: user.occupation
+        }
+
+        response.status(200).send(userObj);
+    });
 
 });
 
 /*
  * URL /photosOfUser/:id - Return the Photos for User (id)
  */
- app.get('/photosOfUser/:id', function(request, response) {
-     var id = request.params.id;
-     console.log("in server, get photos of user, id", id);
-     Photo.find({
-         'user_id': id
-     }, function(err, photos) {
-         if (err != null) {
-             response.status(400).send(JSON.stringify(err));
-             return;
-         }
+app.get('/photosOfUser/:id', function(request, response) {
+    var id = request.params.id;
 
-         photos = photos.filter(function(p) {
-             console.log("visibleNames:", p.visibleNames);
-             if (p.isRestricted === false) {
-                 return true;
-             }
-             else if (id === request.session.user._id) {
-                 return true;
-             }
-             else if (p.visibleNames.indexOf(request.session.user.first_name + ' ' + request.session.user.last_name) >= 0) {
-                 return true;
-             }
-             return false;
-         });
+    Photo.find({
+        'user_id': id
+    }, function(err, photos) {
+        if (err != null) {
+            response.status(400).send(JSON.stringify(err));
+            return;
+        }
+        // filter photos according to users' visibility settings, if current user is not registered as visible, then photo is not displayed
+        photos = photos.filter(function(p) {
 
+            if (p.isRestricted === false) {
+                return true;
+            } else if (id === request.session.user._id) {
+                return true;
+            } else if (p.visibleNames.indexOf(request.session.user.first_name + ' ' + request.session.user.last_name) >= 0) {
+                return true;
+            }
+            return false;
+        });
 
-         var photoCopy = JSON.parse(JSON.stringify(photos));
+        // loop through each photo and then comments, get comment author
+        var photoCopy = JSON.parse(JSON.stringify(photos));
+        async.each(photoCopy, function(photo, callbackPhotos) {
 
-
-         async.each(photoCopy, function(photo, callbackPhotos) {
-             async.each(photo.comments, function(comment, callbackComments) {
-                 User.findOne({
-                     '_id': comment.user_id
-                 }, function(err, user) {
-                     if (err != null) {
-                         console.error("Error");
-                         response.status(400).send(JSON.stringify(err));
-                         return;
-                     }
-                     else if (user === null) {
-                         console.error("User not found.");
-                         response.status(400).send(JSON.stringify(err));
-                         return;
-                     }
-                     comment.user = user;
-                     callbackComments(err);
-                 });
-             }, function(err) {
-                 if (err) {
-                     console.error("Error");
-                 } else {
-                     callbackPhotos(err);
-                 }
-             });
-         }, function(err) {
-             if (err) {
-                 console.error("Error");
-                 response.status(400).send(JSON.stringify(err));
-                 return;
-             } else {
-                 response.status(200).send(photoCopy);
-             }
-         });
-     });
- });
+            async.each(photo.comments, function(comment, callbackComments) {
+                User.findOne({
+                    '_id': comment.user_id
+                }, function(err, user) {
+                    if (err !== null) {
+                        console.error("Error");
+                        response.status(400).send(JSON.stringify(err));
+                        return;
+                    } else if (user === null) {
+                        console.error("In photosOfUser - User not found.");
+                        response.status(400).send(JSON.stringify(err));
+                        return;
+                    }
+                    comment.user = user;
+                    callbackComments(err);
+                });
+            }, function(err) {
+                if (err) {
+                    console.error("Error");
+                } else {
+                    callbackPhotos(err);
+                }
+            });
+        }, function(err) {
+            if (err) {
+                console.error("Error");
+                response.status(400).send(JSON.stringify(err));
+                return;
+            } else {
+                // send photoCopy (a copy of all photos)
+                response.status(200).send(photoCopy);
+            }
+        });
+    });
+});
 
 
 
-/* XXX changed here! */
+// login function
 app.post('/admin/login', function(request, response) {
     var username = request.body.login_name;
     var password = request.body.password;
@@ -289,12 +285,12 @@ app.post('/admin/login', function(request, response) {
         } else {
             request.session.user = user;
             response.status(200).send(user);
-            console.log("log in successful");
+
         }
     });
 });
 
- /*XXX and here!*/
+// register new user
 app.post('/user', function(request, response) {
     if (request.body.login_name === false || request.body.password === false || request.body.first_name === false || request.body.last_name === false) {
         response.status(400).send("missing-item");
@@ -332,6 +328,7 @@ app.post('/user', function(request, response) {
     })
 });
 
+// logout
 app.get('/admin/logout', function(request, response) {
     request.session.destroy(function(err) {
         if (err) {
@@ -343,33 +340,35 @@ app.get('/admin/logout', function(request, response) {
     });
 });
 
+// get comments of photo
 app.post('/commentsOfPhoto/:photo_id', function(request, response) {
 
 
-        var photoId = request.params.photo_id;
-        Photo.findOne({
-            _id: photoId
-        }, function(err, photo) {
-            if (err) {
-                response.status(401).send("photo-error");
-                return;
-            } else if (photo === null) {
-                response.status(401).send('photo-id-error');
-            } else {
-                console.log("found the commented photo!")
-                photo.comments.push({
-                    comment: request.body.comment,
-                    user_id: request.session.user._id
-                });
-                photo.save();
-                response.status(200).send();
-            }
-        });
+    var photoId = request.params.photo_id;
+    Photo.findOne({
+        _id: photoId
+    }, function(err, photo) {
+        if (err) {
+            response.status(401).send("photo-error");
+            return;
+        } else if (photo === null) {
+            response.status(401).send('photo-id-error');
+        } else {
 
-})
+            photo.comments.push({
+                comment: request.body.comment,
+                user_id: request.session.user._id
+            });
+            photo.save();
+            response.status(200).send();
+        }
+    });
 
+});
+
+// upload new photo
 app.post('/photos/new', function(request, response) {
-    console.log("in server, new photo")
+
     processFormBody(request, response, function(err) {
         if (err || !request.file) {
             response.status(400).send("File Upload Error");
@@ -410,8 +409,9 @@ app.post('/photos/new', function(request, response) {
             })
         });
     });
-})
+});
 
+// user likes a photo
 app.post('/like/:photo_id', function(request, response) {
     var photoId = request.params.photo_id;
     Photo.findOne({
@@ -421,19 +421,17 @@ app.post('/like/:photo_id', function(request, response) {
             console.error("Error liking photo");
             reponse.status(401).send("error-like");
             return
-        }
-        else if (photo === null) {
+        } else if (photo === null) {
             console.error("Can't find photo");
             reponse.status(401).send("error-like-invalid-photo");
-        }
-        else {
+        } else {
+            // photo has a schema that keeps track of users who like the photo. This is updated with each like
             var userId = request.session.user._id;
             var userIndex = photo.likes.indexOf(userId);
             if (userIndex < 0) {
                 photo.likes.push(userId);
                 photo.numLikes = photo.likes.length;
-            }
-            else {
+            } else {
                 photo.likes.splice(userIndex, 1);
                 photo.numLikes = photo.likes.length;
             }
@@ -441,6 +439,127 @@ app.post('/like/:photo_id', function(request, response) {
             response.status(200).send("Like/Unlike succuessful");
         }
     });
+});
+
+// delete a photo by the owner
+app.post('/deletePhoto/:photo_id', function(request, response) {
+
+
+    var photoId = request.params.photo_id;
+    Photo.findOne({
+        _id: photoId
+    }, function(err, photo) {
+        if (err) {
+            console.error('cannot find photo:', err);
+            response.status(401).send("photo error");
+            return;
+        } else if (!photo) {
+            console.error('no such photo');
+            response.status(401).send('no such photo');
+        }
+        // remove the photo of given id
+        else {
+            Photo.remove({
+                _id: photoId
+            }, function(err) {
+                if (err) {
+                    response.status(401).send("delete photo error");
+                    return;
+                }
+                response.status(200).send();
+            });
+        }
+    });
+
+});
+// delete a comment
+app.post('/deleteComment/:photo_id', function(request, response) {
+
+
+    var photoId = request.params.photo_id;
+    var comment_index = request.body.comment_index;
+
+
+
+
+    Photo.findOne({
+        _id: photoId
+    }, function(err, photo) {
+        if (err) {
+            console.error('cannot find that photo', err);
+            response.status(401).send("photo error");
+            return;
+        } else if (!photo) {
+            console.error('no such photo');
+            response.status(401).send('no such photo');
+        } else {
+
+            photo.comments.splice(comment_index, 1);
+
+            photo.save();
+            response.status(200).send();
+
+        }
+
+    });
+
+});
+// delect account of a user, removing photos, likes, comments, profile
+app.post("/delete/:id", function(request, response) {
+    var id = request.params.id;
+
+    // remove all photos of the user
+
+    Photo.remove({
+        user_id: id
+    }, function(err) {
+        if (err) {
+            console.err(err);
+            response.status(401).send("error locating photo");
+            return;
+        }
+    });
+
+    // update like and comments of every photo
+    Photo.find({}, function(err, allPhotos) {
+        if (err) {
+            console.error('deleting comment error', err);
+            response.status(400).send(JSON.stringify(err));
+            return;
+        }
+        for (var i = 0; i < allPhotos.length; i++) {
+            if (allPhotos[i].likes.indexOf(id) >= 0) {
+                allPhotos[i].likes.splice(indexOf(id), 1);
+                allPhotos[i].numLikes = allPhotos[i].likes.length;
+            }
+
+            allPhotos[i].comments = allPhotos[i].comments.filter(function(cmt) {
+                return cmt.user_id.toString() !== id;
+            });
+
+            allPhotos[i].save();
+        }
+    });
+
+    // delete user profile
+    User.remove({
+        _id: id
+    }, function(err) {
+        if (err) {
+            response.status(401).send("err removing user");
+            return;
+        }
+        request.session.destroy(function(err2) {
+            if (err) {
+                response.status(401).send("error ending session");
+                return;
+            }
+            response.status(200).send();
+            return;
+        });
+    });
+
+
 });
 
 var server = app.listen(3000, function() {

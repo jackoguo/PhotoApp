@@ -43,7 +43,7 @@ cs142App.controller('MainController', ['$scope', '$rootScope', '$location','$res
         $scope.main = {};
         $scope.main.title = 'CS142 Project';
 
-
+        // get model data
         $scope.FetchModel = function(url, doneCallback) {
             var httpRequest = new XMLHttpRequest();
             httpRequest.onreadystatechange = function() {
@@ -59,21 +59,18 @@ cs142App.controller('MainController', ['$scope', '$rootScope', '$location','$res
             httpRequest.send();
         };
 
+        // get version info
         var Info = $resource('/test/info');
         var data = Info.get({}, function() {
             $scope.version = data.__v;
         });
 
-
-
+        // for the first time log in, if no log in info is provided, default to false
         if ($rootScope.isLoggedIn === undefined) {
             $rootScope.isLoggedIn = false;
         }
-        //
-        // $rootScope.$on("login"), function() {
-        //     $rootScope.isLoggedIn = true;
-        // }
 
+        // if not logged in, always redirect page to log in page
         $rootScope.$on("$routeChangeStart", function(event, next, current) {
             if (!$rootScope.isLoggedIn) {
                 if (next.templateUrl !== "components/login-register/login-registerTemplate.html") {
@@ -81,9 +78,6 @@ cs142App.controller('MainController', ['$scope', '$rootScope', '$location','$res
                 }
             }
         });
-
-
-
 
         var selectedPhotoFile; // Holds the last file selected by the user
 
@@ -107,9 +101,7 @@ cs142App.controller('MainController', ['$scope', '$rootScope', '$location','$res
             var isRestricted = confirm("Do you want to specify a list of accessible users? Ok to specify or Cancel to not specify.");
             var names = [];
 
-
             if (isRestricted === true) {
-                console.log("hello!");
                 var visibleName = prompt("Enter a list of names of users that can see this photo, separated by comma (,). If you don't enter a name, only you are accessible. ");
                 if (visibleName) {
                     var namesRaw = visibleName.split(",");
@@ -119,9 +111,6 @@ cs142App.controller('MainController', ['$scope', '$rootScope', '$location','$res
 
             }
         }
-
-            console.log("names:", names);
-
 
             // Create a DOM form and add the file to it under the name uploadedphoto
             var domForm = new FormData();
@@ -138,9 +127,7 @@ cs142App.controller('MainController', ['$scope', '$rootScope', '$location','$res
             }).then(function successCallback(response) {
                 // The photo was successfully uploaded.
                 $location.path("/photos/" + $rootScope.user._id);
-                console.log("in photo upload function now");
                 $rootScope.$broadcast('render');
-                console.log("Photo uploaded successfully!");
             }, function errorCallback(response) {
                 alert("There is an error!");
                 console.error('ERROR uploading photo', response);

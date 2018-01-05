@@ -1,13 +1,29 @@
 'use strict';
 
-cs142App.controller('UserDetailController', ['$scope', '$resource', '$rootScope', '$routeParams',
-    function($scope, $resource, $rootScope, $routeParams) {
+cs142App.controller('UserDetailController', ['$scope', '$resource', '$rootScope', '$routeParams', '$location',
+    function($scope, $resource, $rootScope, $routeParams, $location) {
         /*
          * Since the route is specified as '/users/:userId' in $routeProvider config the
          * $routeParams  should have the userId property set with the path from the URL.
          */
+
         var userId = $routeParams.userId;
-        console.log("in user detail controller, userID: ", userId);
+        $scope.currUser =  $rootScope.user._id;
+        $scope.userMatches = userId === $scope.currUser;
+        // delete current user, set log in status to be false, redirect to log in page
+        $scope.deleteAccount = function() {
+            var isSure = confirm("Are you sure you want to delete your account permanently?");
+            if (!isSure) {
+                return;
+            }
+            var resource = $resource("/delete/" + $scope.currUser);
+            resource.save(function() {
+                $rootScope.user = null;
+                $rootScope.isLoggedIn = false;
+                $location.path("/login-register");
+            })
+        }
+
         var User = $resource("/user/:_id", {
             _id: userId
         });

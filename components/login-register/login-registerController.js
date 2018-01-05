@@ -2,6 +2,7 @@
 
 cs142App.controller('LoginRegisterController', ['$scope', '$routeParams', '$resource', '$rootScope', '$location',
     function($scope, $routeParams, $resource, $rootScope, $location) {
+        // log in
         $scope.login = function() {
             var resource = $resource('/admin/login');
             resource.save({
@@ -9,13 +10,11 @@ cs142App.controller('LoginRegisterController', ['$scope', '$routeParams', '$reso
                 password: $scope.pw
             }, function(userObj) {
                 console.log('userObj: ', userObj);
-
                 $rootScope.user = userObj;
+                // set logged in flag to be true, redirect to user detail page
                 $rootScope.isLoggedIn = true;
-                // $rootScope.$broadcast('login');
                 console.log($rootScope.isLoggedIn);
                 $location.path('/users/' + userObj._id);
-
             }, function(err) {
                 if (err.data === "wrong") {
                     alert("Invalid username or password!");
@@ -25,7 +24,7 @@ cs142App.controller('LoginRegisterController', ['$scope', '$routeParams', '$reso
             });
         }
 
-
+        // register new user, get details from user input
         $scope.register = function() {
             var resource = $resource('/user');
             resource.save({
@@ -39,6 +38,7 @@ cs142App.controller('LoginRegisterController', ['$scope', '$routeParams', '$reso
             }, function(userObj) {
                 console.log("in register function now");
                 $rootScope.user = userObj;
+                // set logged in flag to be true, and redirect to user detail page
                 $rootScope.isLoggedIn = true;
                 $rootScope.$broadcast('login');
                 $location.path('/users/' + userObj._id);
