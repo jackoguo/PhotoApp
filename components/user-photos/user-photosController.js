@@ -14,7 +14,6 @@ cs142App.controller('UserPhotosController', ['$scope', '$resource', '$rootScope'
             $scope.$apply(function() {
                 $scope.user = data1;
                 $scope.userName = data1.first_name + ' ' + data1.last_name;
-
             });
         });
 
@@ -29,6 +28,7 @@ cs142App.controller('UserPhotosController', ['$scope', '$resource', '$rootScope'
             });
         });
 
+        // adds currently logged in user to the likes list of photo, and reset photo view
         $scope.like = function() {
             var resource = $resource('/like/' + $scope.photo._id);
             resource.save({}, function() {
@@ -36,36 +36,43 @@ cs142App.controller('UserPhotosController', ['$scope', '$resource', '$rootScope'
             });
         };
 
-        // var User = $resource("/user/:id");
-        // User.get({
-        //     _id: userId
-        // }, function(data1) {
-        //     $scope.user = data1;
-        //
-        //     $scope.userName = data1.first_name + ' ' + data1.last_name;
-        //     console.log("in userphoto, get user, user name: ", $scope.userName)
-        // });
-        //
-        //
-        // var UserPhoto = $resource("/photosOfUser/:id");
-        // UserPhoto.query({
-        //     user_id: userId
-        // }, function(data2) {
-        //     $scope.photoList = data2;
-        //     console.log("in userphoto, get user photo");
-        // });
+        // check if photo is uploaded by current logged in user
+        $scope.photoUserMatches = function(photo) {
+            return $scope.currUser === photo.user_id;
+        };
 
+        $scope.deletePhoto = function(photo) {
+            var resource = $resource('/deletePhoto/' + photo._id);
+            resource.save({}, function() {
+                $rootScope.$broadcast('renderPhotos');
+            });
+        };
+
+        // check if comment is written by current logged in user
+        $scope.commentUserMatches = function(comment) {
+            return $scope.currUser === comment.user._id;
+        };
+
+        // user delect own comment
+        $scope.deleteComment = function(photo, comment) {
+            var resource = $resource('/deleteComment/' + photo._id);
+            resource.save({comment_index: photo.comments.indexOf(comment)}, function() {
+                $rootScope.$broadcast('renderPhotos');
+            });
+        };
+
+        // user submits comment
         $scope.addComment = function() {
-
             var resource = $resource('/commentsOfPhoto/' + $scope.photo._id);
             console.log("resource for comment found! photoId: ", $scope.photo._id);
             resource.save({
                 comment: $scope.newComment
             }, function() {
-                console.log("comment saved, broadcasting to render photos again");
                 $rootScope.$broadcast('renderPhotos');
             });
-        }
+        };
+
+        // update photo view on signal
         $scope.$on('renderPhotos', function() {
             $scope.FetchModel('/photosOfUser/' + userId, function(data3) {
                 $scope.$apply(function() {

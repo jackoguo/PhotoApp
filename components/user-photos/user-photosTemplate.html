@@ -15,9 +15,13 @@
 					<input ng-if="photo.likes.indexOf(currUser) !== -1" type="submit" value="Unlike" />
 					<input ng-if="photo.likes.indexOf(currUser) === -1" type="submit" value="Like" />
 				</form>
+
 				<p>
 					Likes: {{photo.numLikes}}
 				</p>
+				<form ng-if="photoUserMatches(photo)" ng-submit="deletePhoto(photo)" ng-controller="UserPhotosController">
+					<input type="submit" value="Delete Photo" />
+				</form>
 			</div>
 			<div class="photos-comment">
                 <p class="comment-intro">
@@ -29,6 +33,9 @@
                             {{userComment.comment}} <br /><br />
                             {{userComment.date_time}}
                         </p>
+						<form ng-if="commentUserMatches(userComment)" ng-submit="deleteComment(photo, userComment)" ng-controller="UserPhotosController">
+							<input type="submit" value="Delete Comment" />
+						</form>
 
 
 				</div>
