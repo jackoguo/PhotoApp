@@ -31,10 +31,12 @@
  *
  */
 
+var env = 'prod'; // ['dev', 'prod']
+
 var mongoose = require('mongoose');
 var mongodb = require('mongodb');
 var async = require('async');
-var session = require('express-session');
+var session = (env === 'dev') ? require('express-session') : require('cookie-session');
 var bodyParser = require('body-parser');
 var fs = require("fs");
 var multer = require('multer');
@@ -57,14 +59,13 @@ var db = mongoose.connection;
 db.on('error', console.error.bind(console, 'MongoDB connection error:'));
 
 
-// We have the express static module (http://expressjs.com/en/starter/static-files.html) do all
-// the work for us.
+// static module
 app.use(express.static(__dirname));
-app.use(session({
-    secret: 'secretKey',
-    resave: false,
-    saveUninitialized: false
-}));
+
+// session management
+var session_options = (env === 'dev') ? {secret: 'secretKey', resave: false, saveUninitialized: false} : {name: 'sessionName', secret: 'secretKey'};
+app.use(session(session_options));
+
 app.use(bodyParser.json());
 
 app.get('/', function(request, response) {
