@@ -567,7 +567,8 @@ app.post("/delete/:id", function(request, response) {
 
 });
 
-var server = app.listen(3000, function() {
-    var port = server.address().port;
-    console.log('Listening at http://localhost:' + port + ' exporting the directory ' + __dirname);
+var port = process.env.PORT || 3000;
+var server = app.listen(port , function() {
+    var server_port = server.address().port;
+    console.log('Listening at http://localhost:' + server_port + ' exporting the directory ' + __dirname);
 });
